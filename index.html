@@ -16,6 +16,7 @@
     --accent:#7fb2cc;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;-moz-text-size-adjust:none;text-size-adjust:100%}
   body{
     font-family:Georgia,'Times New Roman',serif;
     background:
@@ -83,10 +84,10 @@
   .lic-band small{display:block;color:#b88;letter-spacing:4px;font-size:8px;font-weight:normal}
   .lic-body{display:flex;padding:8px 12px;gap:10px;flex:1 1 auto;overflow:hidden}
   .lic-left{flex:1;font-size:9px;line-height:1.3;min-width:0}
-  .stats{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;font-size:8.5px}
+  .stats{display:grid;grid-template-columns:repeat(4,auto);gap:0 6px;font-size:8.5px;line-height:1.4;justify-content:start}
   .stats div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .lic-left b{color:#222}
-  .lic-roles span{display:block;color:var(--red);font-weight:bold;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lic-roles span{display:block;color:var(--red);font-weight:bold;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .lic-photo{width:90px;flex:0 0 auto}
   .lic-photo img{width:90px;height:108px;object-fit:cover;border:1px solid #999;background:#dfe7ef}
   .lic-photo .ph{width:90px;height:108px;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#cdd9e6,#aebfcf);color:#5a6b7d;font-size:10px;text-align:center;border:1px solid #999}
@@ -120,8 +121,10 @@
     <h2>1. Your Details</h2>
     <label>ID type</label>
     <select id="f_persona"></select>
-    <label>Name</label>
-    <input id="f_name" placeholder="A. Leon">
+    <div class="row">
+      <div style="flex:2"><label>Name</label><input id="f_name" placeholder="A. Leon"></div>
+      <div><label>His or Her</label><select id="f_sex"><option value="M">His (M)</option><option value="F">Her (F)</option></select></div>
+    </div>
     <div class="row">
       <div>
         <label>Current State</label>
@@ -138,7 +141,7 @@
       <div><label>Eyes</label><input id="f_eyes" placeholder="Black"></div>
     </div>
     <div class="row">
-      <div><label>Restrictions</label><input id="f_restrict" placeholder="X,Y,Z"></div>
+      <div><label>License class</label><input id="f_restrict" placeholder="A"></div>
       <div><label>Endorsements</label><input id="f_endorse" placeholder="P,X,H"></div>
     </div>
     <div class="keybox">
@@ -146,7 +149,7 @@
       <div class="keys" id="endorse_keys"></div>
     </div>
     <div class="keybox">
-      <div class="keytitle">Class codes (for reference, shown on back)</div>
+      <div class="keytitle">License classes (tap to add, shown on back)</div>
       <div class="keys" id="class_keys"></div>
     </div>
     <label>Roles (one per line)</label>
@@ -179,17 +182,18 @@
       <div class="lic-band" id="L_band">THE ICE FILES<small id="L_bandsub">FIELD AGENT</small></div>
       <div class="lic-body">
         <div class="lic-left">
-          <div style="font-size:13px"><b id="L_name">A. Leon</b></div>
+          <div style="font-size:14px;line-height:1.2"><b id="L_name">A. Leon</b></div>
           <div id="L_addr1">1 Frostbite Blvd / Bay 32</div>
           <div id="L_state2">Cold Sector, Earth</div>
           <div class="lic-roles" id="L_roles" style="margin:3px 0"></div>
           <div class="stats">
-            <div><b>RESTR:</b> <span id="L_restrict"></span></div>
-            <div><b>HEIGHT:</b> <span id="L_height"></span></div>
-            <div><b>ENDORSE:</b> <span id="L_endorse"></span></div>
-            <div><b>WEIGHT:</b> <span id="L_weight"></span></div>
+            <div><b>SEX:</b> <span id="L_sex"></span></div>
+            <div><b>HGT:</b> <span id="L_height"></span></div>
+            <div><b>WGT:</b> <span id="L_weight"></span></div>
             <div><b>HAIR:</b> <span id="L_hair"></span></div>
             <div><b>EYES:</b> <span id="L_eyes"></span></div>
+            <div><b>CLASS:</b> <span id="L_restrict"></span></div>
+            <div style="grid-column:span 2"><b>END:</b> <span id="L_endorse"></span></div>
           </div>
         </div>
         <div class="lic-photo">
@@ -204,11 +208,8 @@
 
     <div class="license" id="license_back" style="margin-top:14px">
       <div class="back-pad">
-        <div class="back-h">CLEARANCE CLASS</div>
-        <div class="back-row"><b>A</b> Cleared for any blended beverage 26 oz or more, including dirty sodas held under a brain-freeze waiver exceeding 10 oz.</div>
-        <div class="back-row"><b>B</b> Cleared for any single frozen drink 26 oz or more, or such drink under a waiver not exceeding 10 oz.</div>
-        <div class="back-row"><b>C</b> Cleared for any drink not meeting Class A, B, or M, rated to serve 1600 or more thirsty subjects.</div>
-        <div class="back-row"><b>M</b> Grounded. Reduced to tap water and ice cubes only.</div>
+        <div class="back-h">LICENSE CLASS</div>
+        <div id="back_classes"></div>
         <div class="back-h">ENDORSEMENT CODE</div>
         <div class="back-codes" id="back_codes"></div>
         <div class="back-foot" id="L_foot">The Ice Files. Novelty member ID. Not a government document.</div>
@@ -305,7 +306,7 @@ const personas={
   pope:{
     label:"The Pope",
     org:"HOLY REGISTRY", corner:"DIV. VAT",
-    band:"THE PONTIFF", sub:"HIS HOLINESS",
+    band:"THE PONTIFF", sub:"{HIS} HOLINESS",
     addr1:"1 Basilica Sq / Balcony", addr2:"Vatican Hill, Earth",
     foot:"Holy Registry. Novelty ID. Not a government document.",
     colors:{green:"#8a7a3a",dark:"#6b5d2a",cream:"#f5f1e4",red:"#9a2f2f"},
@@ -314,7 +315,7 @@ const personas={
   dalai:{
     label:"The Dalai Lama",
     org:"SERENE REGISTRY", corner:"DIV. OM",
-    band:"THE DALAI LAMA", sub:"HIS HOLINESS",
+    band:"THE DALAI LAMA", sub:"{HIS} HOLINESS",
     addr1:"1 Mountain Path / Temple", addr2:"Himalayan Foothills, Earth",
     foot:"Serene Registry. Novelty ID. Not a government document.",
     colors:{green:"#8a5a2a",dark:"#6b441f",cream:"#f4ede2",red:"#9a5a2a"},
@@ -341,11 +342,11 @@ const personas={
   dog:{
     label:"A Dog",
     org:"CANINE REGISTRY", corner:"DIV. WOOF",
-    band:"DOG", sub:"CERTIFIED GOOD BOY",
+    band:"DOG", sub:"CERTIFIED GOOD {BOY}",
     addr1:"The Backyard / Doghouse 1", addr2:"Your House, Earth",
     foot:"Canine Registry. Novelty ID. Not a government document.",
     colors:{green:"#6b5a2a",dark:"#4f421f",cream:"#f3efe2",red:"#8a5a2a"},
-    roles:["PROFESSIONAL BALL FETCHER","MAILMAN MONITOR","TAIL WAGGER","SNACK OPTIMIST","COUCH WARMER","SQUIRREL PURSUER","DOORBELL ALARM","PUDDLE EXPLORER","BELLY RUB RECEIVER","STICK COLLECTOR","ENTHUSIASM SPECIALIST","NAP CONSULTANT","TREAT TRACKER","CAR WINDOW RIDER","VERY GOOD BOY"],
+    roles:["PROFESSIONAL BALL FETCHER","MAILMAN MONITOR","TAIL WAGGER","SNACK OPTIMIST","COUCH WARMER","SQUIRREL PURSUER","DOORBELL ALARM","PUDDLE EXPLORER","BELLY RUB RECEIVER","STICK COLLECTOR","ENTHUSIASM SPECIALIST","NAP CONSULTANT","TREAT TRACKER","CAR WINDOW RIDER","VERY GOOD {BOY}"],
   },
   zookeeper:{
     label:"Zookeeper",
@@ -357,6 +358,111 @@ const personas={
     roles:["ENCLOSURE CLEANER","PENGUIN WRANGLER","FEEDING SCHEDULER","GIRAFFE CONSULTANT","REPTILE WHISPERER","HABITAT DESIGNER","ANIMAL BEHAVIORIST","HOSE OPERATOR","BAMBOO SUPPLIER","NIGHT CHECK PATROL","ENRICHMENT PLANNER","GATE INSPECTOR","PRIMATE REFEREE","BUCKET CARRIER","CONSERVATION LEAD"],
   }
 };
+
+// ---- BACK OF CARD: per-persona license classes and endorsements ----
+const backs={
+  icefiles:{classes:[
+    ["A","Licensed to order any blended beverage 26 oz or larger under a brain-freeze waiver."],
+    ["B","Licensed to say \"make it dirty\" at any soda counter without explanation."],
+    ["C","Licensed to investigate any unexplained chill within 50 feet of a freezer."],
+    ["M","Grounded. Reduced to tap water and ice cubes only."]],
+   endorse:[["P","Pulp Separator"],["F","Flavor Injector"],["D","Dirty Soda Drive"],["S","Slush Resuscitator"],["B","Blender Core Diffuser"],["X","Brain-Freeze Flux Meter"],["C","Crushed Ice Extractor"],["R","Resonant Smoothie Core"]]},
+  sasquatch:{classes:[
+    ["A","Licensed to appear in any photograph, provided it is blurry."],
+    ["B","Licensed to leave size 24 footprints on any public trail."],
+    ["C","Licensed to howl after dark within 3 miles of a campsite."],
+    ["M","Grounded. Must remain a myth."]],
+   endorse:[["F","Footprint Casting"],["H","Howl Amplifier"],["B","Berry Foraging"],["C","Camera Evasion"],["T","Tree Knocking"],["P","Pine Cone Hoarding"],["S","Stealth Shuffle"],["N","Night Vision"]]},
+  pirate:{classes:[
+    ["A","Licensed to command any vessel with three or more masts."],
+    ["B","Licensed to make anyone walk the plank, weather permitting."],
+    ["C","Licensed to bury treasure without filing a map."],
+    ["M","Grounded. Reduced to a rowboat and dry land."]],
+   endorse:[["P","Parrot on Shoulder"],["G","Grog Tolerance"],["E","Eye Patch Rotation"],["K","Knot Mastery"],["C","Cannon Operation"],["M","Map Forgery"],["S","Shanty Lead Vocals"],["H","Hook Hand"]]},
+  hacker:{classes:[
+    ["A","Licensed to say \"I'm in\" within 30 seconds of sitting down."],
+    ["B","Licensed to use green text on any screen, including the microwave."],
+    ["C","Licensed to hack the mainframe. Any mainframe."],
+    ["M","Grounded. Reduced to unplugging the router and plugging it back in."]],
+   endorse:[["R","Root Access"],["S","Sudo Privileges"],["C","Caffeine Overclock"],["H","Hoodie Required"],["D","Dual Monitors"],["K","Loud Mechanical Keyboard"],["P","Proxy Chaining"],["T","Terminal Only"]]},
+  mortician:{classes:[
+    ["A","Licensed to say \"they look so natural\" at any viewing."],
+    ["B","Licensed to drive the long car slowly in any lane."],
+    ["C","Licensed to be the calmest person in any room, always."],
+    ["M","Grounded. Reduced to arranging flowers."]],
+   endorse:[["H","Hearse Operation"],["F","Floral Arrangement"],["W","Solemn Whisper"],["O","Organ Music Selection"],["C","Candle Management"],["G","Guestbook Custody"],["P","Procession Lead"],["Q","Very Quiet Shoes"]]},
+  rocket:{classes:[
+    ["A","Licensed to say \"it's not rocket science\" ironically."],
+    ["B","Licensed to point at any whiteboard and say \"there's your problem.\""],
+    ["C","Licensed to count backwards from ten in public."],
+    ["M","Grounded. Reduced to baking soda and vinegar."]],
+   endorse:[["T","Thrust Calculation"],["F","Fuel Mixing"],["C","Countdown Narration"],["O","Orbital Mechanics"],["R","Re-entry Planning"],["W","Whiteboard Supremacy"],["G","Gravity Negotiation"],["A","Astronaut Small Talk"]]},
+  secret:{classes:[
+    ["A","Licensed to wear sunglasses indoors and at night."],
+    ["B","Licensed to talk into {his} own wrist in public."],
+    ["C","Licensed to say \"copy that\" in any conversation."],
+    ["M","Grounded. Reduced to mall security."]],
+   endorse:[["E","Earpiece Operation"],["S","Sunglasses at All Times"],["M","Motorcade Driving"],["R","Rooftop Spotting"],["D","Dramatic Diving"],["N","Serious Nodding"],["C","Code Name Usage"],["B","Black SUV"]]},
+  pope:{classes:[
+    ["A","Licensed to be the most powerful backseat driver in the Popemobile."],
+    ["B","Licensed to wear the tallest hat in any room."],
+    ["C","Licensed to wave from any balcony at any hour."],
+    ["M","Grounded. Reduced to walking and regular hats."]],
+   endorse:[["P","Popemobile Backseat"],["H","Tall Hat"],["W","Balcony Waving"],["S","Smoke Signals"],["B","Blessing Dispensing"],["L","Latin Fluency"],["R","Ring Presentation"],["D","Dove Release"]]},
+  dalai:{classes:[
+    ["A","Licensed to laugh at anything, anytime, with total sincerity."],
+    ["B","Licensed to remain perfectly calm in any traffic jam."],
+    ["C","Licensed to answer any question with a better question."],
+    ["M","Grounded. Reduced to regular breathing."]],
+   endorse:[["M","Meditation"],["L","Laughter"],["C","Compassion"],["P","Prayer Wheel Spinning"],["T","Tea Ceremony"],["R","Reincarnation Planning"],["S","Serenity"],["W","Wisdom Dispensing"]]},
+  llama:{classes:[
+    ["A","Licensed to spit at anyone who has it coming."],
+    ["B","Licensed to carry up to 75 lbs and complain the whole way."],
+    ["C","Licensed to stare at tourists without blinking."],
+    ["M","Grounded. Reduced to petting zoo duty."]],
+   endorse:[["S","Spitting Range"],["P","Pack Hauling"],["W","Wool Production"],["H","Humming"],["G","Grazing"],["J","Judgmental Stare"],["F","Fence Leaning"],["T","Tourist Photos"]]},
+  cat:{classes:[
+    ["A","Licensed to knock anything off any table."],
+    ["B","Licensed to sit on any keyboard during important work."],
+    ["C","Licensed to sprint through the house at 3 AM."],
+    ["M","Grounded. Reduced to sleeping 23 hours a day."]],
+   endorse:[["K","Knock-Off Specialist"],["B","Box Occupancy"],["L","Lap Claiming"],["N","Napping"],["Z","Zoomies"],["P","Purr Engine"],["I","Ignoring Commands"],["T","Treat Extortion"]]},
+  dog:{classes:[
+    ["A","Licensed to bark at the mail carrier every single day."],
+    ["B","Licensed to ride in any car with {his} head out the window."],
+    ["C","Licensed to beg at the table with maximum eye contact."],
+    ["M","Grounded. Reduced to the backyard."]],
+   endorse:[["F","Fetch"],["W","Tail Wagging"],["S","Squirrel Pursuit"],["B","Belly Rubs"],["C","Couch Access"],["D","Doorbell Alarm"],["T","Treat Detection"],["Z","Zoomies"]]},
+  zookeeper:{classes:[
+    ["A","Licensed to enter any enclosure carrying a bucket."],
+    ["B","Licensed to name animals after coworkers."],
+    ["C","Licensed to referee primate disputes."],
+    ["M","Grounded. Reduced to the gift shop."]],
+   endorse:[["P","Penguin Wrangling"],["R","Reptile Handling"],["F","Feeding Schedule"],["H","Hose Operation"],["G","Giraffe Height Clearance"],["B","Bamboo Supply"],["E","Enrichment Planning"],["N","Night Check"]]}
+};
+
+// his / her swap for any persona text
+function g(s){
+  const f=$('f_sex').value==='F';
+  return s.replace(/\{HIS\}/g,f?'HER':'HIS').replace(/\{his\}/g,f?'her':'his').replace(/\{BOY\}/g,f?'GIRL':'BOY');
+}
+
+// draw the code chips in the form and the back of the card for the active persona
+function renderCodes(){
+  const b=backs[activePersona];
+  const ek=$('endorse_keys'),ck=$('class_keys'),bc=$('back_codes'),bk=$('back_classes');
+  ek.innerHTML='';ck.innerHTML='';bc.innerHTML='';bk.innerHTML='';
+  b.endorse.forEach(([c,d])=>{
+    const el=document.createElement('div');el.className='key';el.innerHTML=`<b>${c}</b> ${d}`;
+    el.addEventListener('click',()=>addCode('f_endorse',c));ek.appendChild(el);
+    const bl=document.createElement('div');bl.innerHTML=`<b>${c}</b> - ${d}`;bc.appendChild(bl);
+  });
+  b.classes.forEach(([c,d])=>{
+    const el=document.createElement('div');el.className='key';el.innerHTML=`<b>${c}</b> ${g(d)}`;
+    el.addEventListener('click',()=>addCode('f_restrict',c));ck.appendChild(el);
+    const bl=document.createElement('div');bl.className='back-row';bl.innerHTML=`<b>${c}</b> ${g(d)}`;bk.appendChild(bl);
+  });
+}
 
 let activePersona="icefiles";
 
@@ -379,10 +485,10 @@ function applyPersona(k){
   $('L_state2b_org').textContent=p.org;
   $('L_corner').textContent=p.corner;
   $('L_band').childNodes[0].nodeValue=p.band;
-  $('L_bandsub').textContent=p.sub;
+  $('L_bandsub').textContent=g(p.sub);
   $('L_addr1').textContent=p.addr1;
   $('L_foot').textContent=p.foot;
-  // default role placeholder preview uses this persona
+  renderCodes();
   sync();
 }
 
@@ -392,19 +498,8 @@ function rollRoles(){
   $('f_roles').value=pick.join('\n');
   sync();
 }
-$('f_persona').addEventListener('change',e=>{applyPersona(e.target.value);rollRoles();});
-
-// endorsement and class codes, Ice Files drink themed
-const endorseCodes=[
-  ["P","Pulp Separator"],["F","Flavor Injector"],["D","Dirty Soda Drive"],
-  ["S","Slush Resuscitator"],["B","Blender Core Diffuser"],["K","Cold Brew Position"],
-  ["X","Brain-Freeze Flux Meter"],["C","Crushed Ice Extractor"],["H","Straw Stage Mooring"],
-  ["R","Resonant Smoothie Core"]
-];
-const classCodes=[
-  ["A","Heavy blend, waiver over 10oz"],["B","Single large frozen drink"],
-  ["C","Serves 1600+ subjects"],["M","Grounded, water and ice only"]
-];
+$('f_persona').addEventListener('change',e=>{$('f_restrict').value='';$('f_endorse').value='';applyPersona(e.target.value);rollRoles();});
+$('f_sex').addEventListener('change',()=>applyPersona(activePersona));
 
 function addCode(inputId,code){
   const inp=$(inputId);
@@ -414,43 +509,21 @@ function addCode(inputId,code){
   sync();
 }
 
-// render endorsement key chips (tap to add)
-const ek=$('endorse_keys');
-endorseCodes.forEach(([c,d])=>{
-  const el=document.createElement('div');
-  el.className='key';el.innerHTML=`<b>${c}</b> ${d}`;
-  el.addEventListener('click',()=>addCode('f_endorse',c));
-  ek.appendChild(el);
-});
-// render class key chips (reference, also fills restrictions)
-const ck=$('class_keys');
-classCodes.forEach(([c,d])=>{
-  const el=document.createElement('div');
-  el.className='key';el.innerHTML=`<b>${c}</b> ${d}`;
-  el.addEventListener('click',()=>addCode('f_restrict',c));
-  ck.appendChild(el);
-});
-// render back-of-card codes
-const bc=$('back_codes');
-endorseCodes.forEach(([c,d])=>{
-  const el=document.createElement('div');
-  el.innerHTML=`<b>${c}</b> - ${d}`;
-  bc.appendChild(el);
-});
-
 // live preview binding
 function sync(){
   $('L_name').textContent=$('f_name').value||'A. Leon';
   $('L_state').textContent=($('f_state').value||'Oregon').toUpperCase();
   $('L_state2').textContent=$('f_state').value+", Earth";
-  $('L_restrict').textContent=$('f_restrict').value||'X,Y,Z';
-  $('L_endorse').textContent=$('f_endorse').value||'Y,O,U';
+  const bk=backs[activePersona];
+  $('L_sex').textContent=$('f_sex').value;
+  $('L_restrict').textContent=$('f_restrict').value||'A';
+  $('L_endorse').textContent=$('f_endorse').value||bk.endorse.slice(0,3).map(e=>e[0]).join(',');
   $('L_height').textContent=$('f_height').value||"3'3\"";
   $('L_weight').textContent=$('f_weight').value||'Weightless';
   $('L_hair').textContent=$('f_hair').value||'None';
   $('L_eyes').textContent=$('f_eyes').value||'Black';
   const roles=($('f_roles').value||personas[activePersona].roles.slice(0,3).join('\n')).split('\n').filter(Boolean);
-  $('L_roles').innerHTML=roles.map(r=>`<span>X ${r.trim()}</span>`).join('');
+  $('L_roles').innerHTML=roles.map(r=>`<span>X ${g(r.trim())}</span>`).join('');
 }
 ['f_name','f_state','f_restrict','f_endorse','f_height','f_weight','f_hair','f_eyes','f_roles']
   .forEach(id=>$(id).addEventListener('input',sync));
